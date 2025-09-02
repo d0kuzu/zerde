@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  app:
+    build: .               # Соберёт образ из Dockerfile в этой папке
+    container_name: gin-app
+    ports:
+      - "8080:8080"        # Проброс порта
+    restart: unless-stopped
