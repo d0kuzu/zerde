@@ -20,7 +20,7 @@ func RouterStart(settings config.Settings) {
 
 	rest.ChatRoutes(r, settings)
 
-	err := r.Run(":8081")
+	err := r.Run(":8080")
 	if err != nil {
 		log.Fatal("Router start error", err)
 	}
