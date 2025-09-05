@@ -2,9 +2,10 @@ package chat_controllers
 
 import (
 	"AISale/config"
-	"AISale/services/airtable"
+	twilio "AISale/services/twillio"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 type ChatHandler struct {
@@ -16,17 +17,31 @@ func NewChatHandler(cfg *config.Settings) *ChatHandler {
 }
 
 func (h *ChatHandler) GetAllChats(c *gin.Context) {
-	client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)
+	// get numbers from airtable
 
-	records, err := client.ListRecords(h.cfg.TableName)
+	//client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)
+	//
+	//records, err := client.ListRecords(h.cfg.TableName)
+	//if err != nil {
+	//	c.JSON(500, gin.H{"error": err.Error()})
+	//	return
+	//}
+
+	// get messages from twillio
+
+	clientNumber := "+14086851938"
+	botNumber := "+16693420294"
+
+	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
+
+	messages, err := twilioClient.GetConversation(clientNumber, botNumber, 50)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
+		log.Fatal(err)
 	}
 
-	for _, rec := range records {
-		fmt.Println(rec.ID, *rec.Fields.Email, *rec.Fields.FullName)
+	for _, m := range messages {
+		fmt.Printf("[%s] %s → %s: %s\n", m.DateCreated, m.From, m.To, m.Body)
 	}
 
-	c.JSON(200, gin.H{"answer": records})
+	c.JSON(200, gin.H{"answer": ""})
 }

@@ -8,6 +8,9 @@ type Settings struct {
 	ApiKey    string
 	BaseID    string
 	TableName string
+
+	AccountSID string
+	AuthToken  string
 }
 
 func LoadConfig() (*Settings, error) {
@@ -22,5 +25,8 @@ func LoadConfig() (*Settings, error) {
 		ApiKey:    viper.GetString("API_KEY"),
 		BaseID:    viper.GetString("BASE_ID"),
 		TableName: viper.GetString("TABLE_NAME"),
+
+		AccountSID: viper.GetString("ACCOUNT_SID"),
+		AuthToken:  viper.GetString("AUTH_TOKEN"),
 	}, nil
 }
