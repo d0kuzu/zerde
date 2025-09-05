@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func RouterStart(settings config.Settings) {
+func RouterStart(settings *config.Settings) {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{

@@ -1,54 +1,26 @@
 package config
 
 import (
-	"errors"
-	"github.com/joho/godotenv"
-	"os"
-	"time"
+	"github.com/spf13/viper"
 )
 
 type Settings struct {
-	DbHost     string
-	DbUser     string
-	DbPassword string
-	DbName     string
-	DbPort     string
-	Ssl        string
-
-	QdrantGRPCHost string
-
-	OpenaiApiKey string
-
-	TwilioUsername string
-	TwilioToken    string
-	TwilioNumber   string
+	ApiKey    string
+	BaseID    string
+	TableName string
 }
 
-func LoadENV() (Settings, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return Settings{}, errors.New("error loading .env file: " + err.Error())
+func LoadConfig() (*Settings, error) {
+	viper.SetConfigFile(".env")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, err
 	}
 
-	settings := Settings{
-		DbHost:     os.Getenv("DB_HOST"),
-		DbUser:     os.Getenv("DB_USER"),
-		DbPassword: os.Getenv("DB_PASSWORD"),
-		DbName:     os.Getenv("DB_NAME"),
-		DbPort:     os.Getenv("DB_PORT"),
-		Ssl:        os.Getenv("DB_SSL"),
-
-		QdrantGRPCHost: os.Getenv("QDRANT_GRPC_HOST"),
-
-		OpenaiApiKey: os.Getenv("OPENAI_API_KEY"),
-
-		TwilioUsername: os.Getenv("TWILIO_ACCOUNT_SID"),
-		TwilioToken:    os.Getenv("TWILIO_AUTH_TOKEN"),
-		TwilioNumber:   os.Getenv("TWILIO_PHONE_NUMBER"),
-	}
-
-	return settings, nil
+	return &Settings{
+		ApiKey:    viper.GetString("API_KEY"),
+		BaseID:    viper.GetString("BASE_ID"),
+		TableName: viper.GetString("TABLE_NAME"),
+	}, nil
 }
-
-const WaitingTime = time.Minute
-const MaxRemindCount = 2
