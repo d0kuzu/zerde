@@ -1,7 +1,9 @@
 package config
 
 import (
-	"github.com/spf13/viper"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Settings struct {
@@ -14,19 +16,14 @@ type Settings struct {
 }
 
 func LoadConfig() (*Settings, error) {
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
+	// Загружаем .env файл (если есть)
+	godotenv.Load(".env")
 
 	return &Settings{
-		ApiKey:    viper.GetString("API_KEY"),
-		BaseID:    viper.GetString("BASE_ID"),
-		TableName: viper.GetString("TABLE_NAME"),
-
-		AccountSID: viper.GetString("ACCOUNT_SID"),
-		AuthToken:  viper.GetString("AUTH_TOKEN"),
+		ApiKey:     os.Getenv("API_KEY"),
+		BaseID:     os.Getenv("BASE_ID"),
+		TableName:  os.Getenv("TABLE_NAME"),
+		AccountSID: os.Getenv("ACCOUNT_SID"),
+		AuthToken:  os.Getenv("AUTH_TOKEN"),
 	}, nil
 }
