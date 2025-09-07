@@ -1,45 +1,139 @@
 package airtable
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
-func (c *Client) ListRecords(table string) ([]byte, error) {
+func (c *Client) ListPageRecords(table string, page, pageSize int64) ([]Record, error) {
+	if pageSize <= 0 {
+		pageSize = 20 // дефолтное значение
+	}
+
 	baseURL := fmt.Sprintf("https://api.airtable.com/v0/%s/%s", c.BaseID, table)
 
-	// Добавляем query-параметры для выбора только нужных колонок
-	u, err := url.Parse(baseURL)
-	if err != nil {
-		return nil, err
+	var records []Record
+	var offset string
+	var currentPage int64 = 1
+
+	for {
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return nil, err
+		}
+
+		q := u.Query()
+		q.Add("fields[]", "Mobile Number")
+		q.Add("fields[]", "Status")
+		q.Add("pageSize", strconv.FormatInt(pageSize, 10))
+
+		if offset != "" {
+			q.Add("offset", offset)
+		}
+		u.RawQuery = q.Encode()
+
+		req, err := http.NewRequest("GET", u.String(), nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+c.APIKey)
+
+		resp, err := c.Client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		var data ListResponse
+		if err := json.Unmarshal(body, &data); err != nil {
+			return nil, err
+		}
+
+		// Если мы на нужной странице → возвращаем
+		if currentPage == page {
+			if len(data.Records) > int(pageSize) {
+				return data.Records[:pageSize], nil
+			}
+			return data.Records, nil
+		}
+
+		// Если страниц больше нет → выходим
+		if data.Offset == "" {
+			break
+		}
+		offset = data.Offset
+		currentPage++
 	}
 
-	q := u.Query()
-	q.Add("fields[]", "Mobile Number")
-	q.Add("fields[]", "Status")
-	q.Add("maxRecords", "5")
-	u.RawQuery = q.Encode()
+	return records, nil
+}
 
-	// Формируем запрос
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+c.APIKey)
-
-	// Выполняем
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+func (c *Client) GetTotalPages(table string, pageSize int64) (int64, error) {
+	if pageSize <= 0 {
+		pageSize = 20
 	}
 
-	return body, nil
+	baseURL := fmt.Sprintf("https://api.airtable.com/v0/%s/%s", c.BaseID, table)
+
+	var offset string
+	var total int64
+
+	for {
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return 0, err
+		}
+
+		q := u.Query()
+		q.Add("fields[]", "Mobile Number")
+		q.Add("fields[]", "Status")
+		q.Add("pageSize", "100") // максимально допустимое для скорости
+
+		if offset != "" {
+			q.Add("offset", offset)
+		}
+		u.RawQuery = q.Encode()
+
+		req, err := http.NewRequest("GET", u.String(), nil)
+		if err != nil {
+			return 0, err
+		}
+		req.Header.Set("Authorization", "Bearer "+c.APIKey)
+
+		resp, err := c.Client.Do(req)
+		if err != nil {
+			return 0, err
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return 0, err
+		}
+
+		var data ListResponse
+		if err := json.Unmarshal(body, &data); err != nil {
+			return 0, err
+		}
+
+		total += int64(len(data.Records))
+
+		if data.Offset == "" {
+			break
+		}
+		offset = data.Offset
+	}
+
+	// считаем количество страниц
+	totalPages := (total + pageSize - 1) / pageSize
+	return totalPages, nil
 }

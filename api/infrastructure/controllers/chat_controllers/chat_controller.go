@@ -4,10 +4,9 @@ import (
 	"AISale/config"
 	"AISale/services/airtable"
 	twilio "AISale/services/twillio"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
+	"strconv"
 )
 
 type ChatHandler struct {
@@ -21,31 +20,41 @@ func NewChatHandler(cfg *config.Settings) *ChatHandler {
 func (h *ChatHandler) GetAllChats(c *gin.Context) {
 	client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)
 
-	records, err := client.ListRecords(h.cfg.TableName)
+	page, err := strconv.ParseInt(c.Query("page"), 10, 32)
+	if err != nil {
+		panic(err)
+	}
+
+	records, err := client.ListPageRecords(h.cfg.TableName, page, 20)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(200, gin.H{"answer": string(records)})
+	c.JSON(200, gin.H{"answer": records})
+}
+
+func (h *ChatHandler) GetPagination(c *gin.Context) {
+	client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)
+
+	pages, err := client.GetTotalPages(h.cfg.TableName, 20)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(200, gin.H{"answer": pages})
 }
 
 func (h *ChatHandler) GetChat(c *gin.Context) {
 	clientNumber := c.Query("chat")
-	if clientNumber == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "client number required"})
-		return
-	}
 	botNumber := "+16693420294"
 
 	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
 
-	messages, err := twilioClient.GetConversation(clientNumber, botNumber, 50)
+	messages, err := twilioClient.GetConversation(clientNumber, botNumber, 100)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, m := range messages {
-		fmt.Printf("[%s] %s → %s: %s\n", m.DateCreated, m.From, m.To, m.Body)
-	}
+	c.JSON(200, gin.H{"answer": messages})
 }

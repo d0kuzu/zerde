@@ -20,4 +20,5 @@ type Record struct {
 
 type ListResponse struct {
 	Records []Record `json:"records"`
+	Offset  string   `json:"offset,omitempty"`
 }
