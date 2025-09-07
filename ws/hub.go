@@ -30,15 +30,15 @@ func UnregisterClient(c *Client) {
 	c.conn.Close()
 }
 
-func Broadcast(chatID string, msg string) {
+func Broadcast(chatID string, msg []byte) {
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
 
 	for c := range clients {
 		if c.chat == chatID {
-			err := c.conn.WriteMessage(websocket.TextMessage, []byte(msg))
+			err := c.conn.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
-				log.Println("write error:", err)
+				log.Println("ws message write error:", err)
 				c.conn.Close()
 				delete(clients, c)
 			}

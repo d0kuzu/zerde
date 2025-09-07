@@ -1,7 +1,9 @@
 package ws
 
 import (
+	"AISale/config"
 	twilio "AISale/services/twillio"
+	"encoding/json"
 	"log"
 	"time"
 )
@@ -19,18 +21,35 @@ func PollTwilio(chatID, accountSID, authToken string) {
 		}
 
 		for _, m := range messages {
-			Broadcast(chatID, m.Body)
+			var author string
+			if m.From != config.BotNumber {
+				author = "bot"
+			} else {
+				author = "client"
+			}
+
+			msg := Message{
+				Author: author,
+				Body:   m.Body,
+			}
+
+			data, err := json.Marshal(msg)
+			if err != nil {
+				log.Println("ws message json marshal error:", err)
+			}
+
+			Broadcast(chatID, data)
+
 			lastMessageSID = m.Sid
 		}
 	}
 }
 
 func fetchMessagesFromTwilio(chatID, lastSID, accountSID, authToken string) ([]twilio.Message, error) {
-	botNumber := "+16693420294"
 
 	twilioClient := twilio.NewClient(accountSID, authToken)
 
-	messages, err := twilioClient.GetConversation(chatID, botNumber, 50)
+	messages, err := twilioClient.GetConversation(chatID, config.BotNumber, 50)
 	if err != nil {
 		return nil, err
 	}
