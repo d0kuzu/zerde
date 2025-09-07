@@ -29,6 +29,8 @@ func (c *Client) ListPageRecords(table string, page, pageSize int64) ([]Record, 
 		q := u.Query()
 		q.Add("fields[]", "Mobile Number")
 		q.Add("fields[]", "Status")
+		q.Add("sort[0][field]", "CreatedTime")
+		q.Add("sort[0][direction]", "desc")
 		q.Add("pageSize", strconv.FormatInt(pageSize, 10))
 
 		if offset != "" {
