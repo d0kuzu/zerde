@@ -44,7 +44,7 @@ func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]M
 	clientNumber = strings.ReplaceAll(clientNumber, "-", "")
 
 	if len(clientNumber) > 12 {
-		clientNumber = "+" + "1" + clientNumber[2:]
+		clientNumber = "+" + "1" + clientNumber[3:]
 	}
 
 	incoming, err := c.fetchMessages(clientNumber, botNumber, limit)
