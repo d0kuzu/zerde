@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"sort"
+	"strings"
 )
 
 func (c *Client) fetchMessages(from, to string, limit int) ([]Message, error) {
@@ -40,6 +41,12 @@ func (c *Client) fetchMessages(from, to string, limit int) ([]Message, error) {
 }
 
 func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]Message, error) {
+	clientNumber = strings.ReplaceAll(clientNumber, "-", "")
+
+	if len(clientNumber) > 12 {
+		clientNumber = "+" + "1" + clientNumber[2:]
+	}
+
 	incoming, err := c.fetchMessages(clientNumber, botNumber, limit)
 	if err != nil {
 		return nil, err

@@ -47,11 +47,10 @@ func (h *ChatHandler) GetPagination(c *gin.Context) {
 
 func (h *ChatHandler) GetChat(c *gin.Context) {
 	clientNumber := c.Query("chat")
-	botNumber := "+16693420294"
 
 	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
 
-	messages, err := twilioClient.GetConversation(clientNumber, botNumber, 100)
+	messages, err := twilioClient.GetConversation(clientNumber, config.BotNumber, 100)
 	if err != nil {
 		log.Fatal(err)
 	}
