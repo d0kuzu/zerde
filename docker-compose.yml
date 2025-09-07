@@ -5,7 +5,7 @@ services:
     build: .
     container_name: go_app
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "8080:8080"
     restart: unless-stopped
     env_file:
       - .env
