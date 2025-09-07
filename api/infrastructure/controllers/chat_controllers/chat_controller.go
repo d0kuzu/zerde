@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
 )
 
 type ChatHandler struct {
@@ -26,11 +27,15 @@ func (h *ChatHandler) GetAllChats(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"answer": records})
+	c.JSON(200, gin.H{"answer": string(records)})
 }
 
-func (h *ChatHandler) AddChat(c *gin.Context) {
-	clientNumber := "+14086851938"
+func (h *ChatHandler) GetChat(c *gin.Context) {
+	clientNumber := c.Query("chat")
+	if clientNumber == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "client number required"})
+		return
+	}
 	botNumber := "+16693420294"
 
 	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)

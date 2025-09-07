@@ -6,9 +6,9 @@ package airtable
 //}
 
 type PurchaseFields struct {
-	Email    string `json:"Email,omitempty"`
-	FullName string `json:"Получатель(ФИО),omitempty"`
-	Test     string `json:"asd,omitempty"`
+	MobileNumber string `json:"Mobile Number,omitempty"`
+	Status       string `json:"Status,omitempty"`
+
 	//Other   map[string]interface{}  `json:"-"`
 }
 

@@ -1,22 +1,35 @@
 package airtable
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
-func (c *Client) ListRecords(table string) ([]Record, error) {
-	url := fmt.Sprintf("https://api.airtable.com/v0/%s/%s", c.BaseID, table)
+func (c *Client) ListRecords(table string) ([]byte, error) {
+	baseURL := fmt.Sprintf("https://api.airtable.com/v0/%s/%s", c.BaseID, table)
 
-	req, err := http.NewRequest("GET", url, nil)
+	// Добавляем query-параметры для выбора только нужных колонок
+	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, err
 	}
 
+	q := u.Query()
+	q.Add("fields[]", "Mobile Number")
+	q.Add("fields[]", "Status")
+	q.Add("maxRecords", "5")
+	u.RawQuery = q.Encode()
+
+	// Формируем запрос
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Set("Authorization", "Bearer "+c.APIKey)
 
+	// Выполняем
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
@@ -28,10 +41,5 @@ func (c *Client) ListRecords(table string) ([]Record, error) {
 		return nil, err
 	}
 
-	var data ListResponse
-	if err = json.Unmarshal(body, &data); err != nil {
-		return nil, err
-	}
-
-	return data.Records, nil
+	return body, nil
 }
