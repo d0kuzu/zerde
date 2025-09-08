@@ -62,11 +62,19 @@ func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]M
 	all := append(incoming, outgoing...)
 
 	sort.Slice(all, func(i, j int) bool {
-		ti, err1 := time.Parse(time.RFC1123Z, all[i].DateCreated)
-		tj, err2 := time.Parse(time.RFC1123Z, all[j].DateCreated)
-		if err1 != nil || err2 != nil {
-			return false
+		layoutZ := time.RFC1123Z // с часовым смещением +0000
+		layoutG := time.RFC1123  // с GMT
+
+		ti, err := time.Parse(layoutZ, all[i].DateCreated)
+		if err != nil {
+			ti, _ = time.Parse(layoutG, all[i].DateCreated)
 		}
+
+		tj, err := time.Parse(layoutZ, all[j].DateCreated)
+		if err != nil {
+			tj, _ = time.Parse(layoutG, all[j].DateCreated)
+		}
+
 		return ti.Before(tj)
 	})
 
