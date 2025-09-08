@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"time"
 )
 
 func (c *Client) fetchMessages(from, to string, limit int) ([]Message, error) {
@@ -61,7 +62,12 @@ func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]M
 	all := append(incoming, outgoing...)
 
 	sort.Slice(all, func(i, j int) bool {
-		return all[i].DateCreated < all[j].DateCreated
+		ti, err1 := time.Parse(time.RFC1123Z, all[i].DateCreated)
+		tj, err2 := time.Parse(time.RFC1123Z, all[j].DateCreated)
+		if err1 != nil || err2 != nil {
+			return false
+		}
+		return ti.Before(tj)
 	})
 
 	if len(all) > limit {
