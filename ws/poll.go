@@ -49,7 +49,7 @@ func fetchMessagesFromTwilio(chatID, lastSID, accountSID, authToken string) ([]t
 
 	twilioClient := twilio.NewClient(accountSID, authToken)
 
-	messages, err := twilioClient.GetConversation(chatID, config.BotNumber, 100)
+	messages, err := twilioClient.GetConversation(chatID, config.BotNumber, 1000)
 	if err != nil {
 		return nil, err
 	}

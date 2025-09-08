@@ -50,7 +50,7 @@ func (h *ChatHandler) GetChat(c *gin.Context) {
 
 	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
 
-	messages, err := twilioClient.GetConversation(clientNumber, config.BotNumber, 100)
+	messages, err := twilioClient.GetConversation(clientNumber, config.BotNumber, 1000)
 	if err != nil {
 		log.Fatal(err)
 	}
