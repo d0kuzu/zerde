@@ -12,8 +12,6 @@ func PollTwilio(chatID, accountSID, authToken string) {
 	var lastMessageSID string
 
 	for {
-		time.Sleep(5 * time.Second)
-
 		messages, err := fetchMessagesFromTwilio(chatID, lastMessageSID, accountSID, authToken)
 		if err != nil {
 			log.Println("Twilio fetch error:", err)
@@ -42,6 +40,8 @@ func PollTwilio(chatID, accountSID, authToken string) {
 
 			lastMessageSID = m.Sid
 		}
+
+		time.Sleep(5 * time.Second)
 	}
 }
 

@@ -6,8 +6,9 @@ package airtable
 //}
 
 type PurchaseFields struct {
-	MobileNumber string `json:"Mobile Number,omitempty"`
-	Status       string `json:"Status,omitempty"`
+	MobileNumber   string `json:"Mobile Number,omitempty"`
+	Status         string `json:"Status,omitempty"`
+	ConversationID string `json:"Conversation ID,omitempty"`
 
 	//Other   map[string]interface{}  `json:"-"`
 }

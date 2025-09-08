@@ -2,6 +2,7 @@ package ws
 
 import (
 	"AISale/config"
+	twilio "AISale/services/twillio"
 	"log"
 	"net/http"
 
@@ -40,10 +41,10 @@ func (h *WSHandler) ChatPolling(c *gin.Context) {
 
 	go PollTwilio(chatID, h.cfg.AccountSID, h.cfg.AuthToken)
 
-	go client.Listen()
+	go client.Listen(h.cfg.AccountSID, h.cfg.AuthToken)
 }
 
-func (c *Client) Listen() {
+func (c *Client) Listen(accountSID, authToken string) {
 	defer UnregisterClient(c)
 
 	for {
@@ -54,6 +55,10 @@ func (c *Client) Listen() {
 		}
 		log.Printf("[Operator → Twilio] Chat %s: %s\n", c.chat, string(msg))
 
-		// здесь делаем twilio.SendMessage(c.chat, string(msg))
+		twilioClient := twilio.NewClient(accountSID, authToken)
+		_, err = twilioClient.SendMessage(config.BotNumber, c.chat, string(msg))
+		if err != nil {
+			log.Println("ws twillio message send error:", err)
+		}
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 )
@@ -68,4 +69,46 @@ func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]M
 	}
 
 	return all, nil
+}
+
+func (c *Client) SendMessage(from, to, body string) (*Message, error) {
+	from = strings.ReplaceAll(from, "-", "")
+
+	if len(from) > 12 {
+		from = "+" + "1" + from[3:]
+	}
+
+	data := url.Values{}
+	data.Set("From", from)
+	data.Set("To", to)
+	data.Set("Body", body)
+
+	req, err := http.NewRequest("POST", fmt.Sprintf(
+		"https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json",
+		c.AccountSID,
+	), strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", c.authHeader())
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var msg Message
+	if err := json.Unmarshal(bodyResp, &msg); err != nil {
+		return nil, err
+	}
+
+	return &msg, nil
 }

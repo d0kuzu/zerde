@@ -10,10 +10,6 @@ import (
 )
 
 func (c *Client) ListPageRecords(table string, page, pageSize int64) ([]Record, error) {
-	if pageSize <= 0 {
-		pageSize = 20 // дефолтное значение
-	}
-
 	baseURL := fmt.Sprintf("https://api.airtable.com/v0/%s/%s", c.BaseID, table)
 
 	var records []Record
@@ -60,7 +56,6 @@ func (c *Client) ListPageRecords(table string, page, pageSize int64) ([]Record, 
 			return nil, err
 		}
 
-		// Если мы на нужной странице → возвращаем
 		if currentPage == page {
 			if len(data.Records) > int(pageSize) {
 				return data.Records[:pageSize], nil
@@ -68,7 +63,6 @@ func (c *Client) ListPageRecords(table string, page, pageSize int64) ([]Record, 
 			return data.Records, nil
 		}
 
-		// Если страниц больше нет → выходим
 		if data.Offset == "" {
 			break
 		}
@@ -80,10 +74,6 @@ func (c *Client) ListPageRecords(table string, page, pageSize int64) ([]Record, 
 }
 
 func (c *Client) GetTotalPages(table string, pageSize int64) (int64, error) {
-	if pageSize <= 0 {
-		pageSize = 20
-	}
-
 	baseURL := fmt.Sprintf("https://api.airtable.com/v0/%s/%s", c.BaseID, table)
 
 	var offset string
@@ -98,7 +88,7 @@ func (c *Client) GetTotalPages(table string, pageSize int64) (int64, error) {
 		q := u.Query()
 		q.Add("fields[]", "Mobile Number")
 		q.Add("fields[]", "Status")
-		q.Add("pageSize", "100") // максимально допустимое для скорости
+		q.Add("pageSize", "100")
 
 		if offset != "" {
 			q.Add("offset", offset)
@@ -135,7 +125,6 @@ func (c *Client) GetTotalPages(table string, pageSize int64) (int64, error) {
 		offset = data.Offset
 	}
 
-	// считаем количество страниц
 	totalPages := (total + pageSize - 1) / pageSize
 	return totalPages, nil
 }
