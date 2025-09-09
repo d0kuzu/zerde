@@ -5,7 +5,6 @@ import (
 	twilio "AISale/services/twillio"
 	"encoding/json"
 	"log"
-	"time"
 )
 
 func (c *Client) PollTwilio(chatID, accountSID, authToken string) {
@@ -40,8 +39,7 @@ func (c *Client) PollTwilio(chatID, accountSID, authToken string) {
 
 			lastMessageSID = m.Sid
 		}
-
-		time.Sleep(1 * time.Second)
+		//time.Sleep(1 * time.Second)
 	}
 }
 
