@@ -37,7 +37,7 @@ func (h *ChatHandler) GetAllChats(c *gin.Context) {
 func (h *ChatHandler) GetPagination(c *gin.Context) {
 	client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)
 
-	pages, err := client.GetTotalPages(h.cfg.TableName, 20)
+	pages, err := client.GetTotalPages(h.cfg.TableName, 10)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 	}
