@@ -4,6 +4,7 @@ import (
 	"AISale/config"
 	twilio "AISale/services/twillio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 )
@@ -19,6 +20,7 @@ func PollTwilio(chatID, accountSID, authToken string) {
 		}
 
 		for _, m := range messages {
+			fmt.Println(m.Body)
 			var author string
 			if m.From != config.BotNumber {
 				author = "bot"
@@ -40,6 +42,7 @@ func PollTwilio(chatID, accountSID, authToken string) {
 
 			lastMessageSID = m.Sid
 		}
+		fmt.Println("sended")
 
 		time.Sleep(3 * time.Second)
 	}
