@@ -30,7 +30,7 @@ func UnregisterClient(c *Client) {
 	c.conn.Close()
 }
 
-func Broadcast(chatID string, msg []byte) {
+func (с *Client) Broadcast(chatID string, msg []byte) {
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
 

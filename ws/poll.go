@@ -4,12 +4,11 @@ import (
 	"AISale/config"
 	twilio "AISale/services/twillio"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 )
 
-func PollTwilio(chatID, accountSID, authToken string) {
+func (c *Client) PollTwilio(chatID, accountSID, authToken string) {
 	var lastMessageSID string
 
 	for {
@@ -20,7 +19,6 @@ func PollTwilio(chatID, accountSID, authToken string) {
 		}
 
 		for _, m := range messages {
-			fmt.Println(m.Body)
 			var author string
 			if m.From != config.BotNumber {
 				author = "bot"
@@ -38,11 +36,10 @@ func PollTwilio(chatID, accountSID, authToken string) {
 				log.Println("ws message json marshal error:", err)
 			}
 
-			Broadcast(chatID, data)
+			c.Broadcast(chatID, data)
 
 			lastMessageSID = m.Sid
 		}
-		fmt.Println("sended")
 
 		time.Sleep(3 * time.Second)
 	}

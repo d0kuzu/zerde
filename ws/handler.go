@@ -39,7 +39,7 @@ func (h *WSHandler) ChatPolling(c *gin.Context) {
 	RegisterClient(client)
 	log.Println("new client connected to chat", chatID)
 
-	go PollTwilio(chatID, h.cfg.AccountSID, h.cfg.AuthToken)
+	go client.PollTwilio(chatID, h.cfg.AccountSID, h.cfg.AuthToken)
 
 	go client.Listen(h.cfg.AccountSID, h.cfg.AuthToken)
 }
