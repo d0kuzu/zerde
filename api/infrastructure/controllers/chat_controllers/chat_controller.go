@@ -25,7 +25,7 @@ func (h *ChatHandler) GetAllChats(c *gin.Context) {
 		panic(err)
 	}
 
-	records, err := client.ListPageRecords(h.cfg.TableName, page, 20)
+	records, err := client.ListPageRecords(h.cfg.TableName, page, 10)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
