@@ -41,7 +41,7 @@ func (c *Client) PollTwilio(chatID, accountSID, authToken string) {
 			lastMessageSID = m.Sid
 		}
 
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 }
 
