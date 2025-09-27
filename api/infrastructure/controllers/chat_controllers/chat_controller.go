@@ -57,3 +57,17 @@ func (h *ChatHandler) GetChat(c *gin.Context) {
 
 	c.JSON(200, gin.H{"answer": messages})
 }
+
+func (h *ChatHandler) SearchChat(c *gin.Context) {
+	client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)
+
+	chat := c.Query("chat")
+
+	record, err := client.SearchChat(h.cfg.TableName, chat)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"answer": record})
+}
