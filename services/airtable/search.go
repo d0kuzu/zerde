@@ -9,15 +9,16 @@ import (
 	"strings"
 )
 
-func (c *Client) SearchChat(table, number string) (Record, error) {
+func (c *Client) SearchChat(table, number string) ([]Record, error) {
 	baseURL := fmt.Sprintf("https://api.airtable.com/v0/%s/%s", c.BaseID, table)
 
 	var offset string
+	var records []Record
 
 	for {
 		u, err := url.Parse(baseURL)
 		if err != nil {
-			return Record{}, err
+			return []Record{}, err
 		}
 
 		q := u.Query()
@@ -32,29 +33,29 @@ func (c *Client) SearchChat(table, number string) (Record, error) {
 
 		req, err := http.NewRequest("GET", u.String(), nil)
 		if err != nil {
-			return Record{}, err
+			return []Record{}, err
 		}
 		req.Header.Set("Authorization", "Bearer "+c.APIKey)
 
 		resp, err := c.Client.Do(req)
 		if err != nil {
-			return Record{}, err
+			return []Record{}, err
 		}
 		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return Record{}, err
+			return []Record{}, err
 		}
 
 		var data ListResponse
 		if err := json.Unmarshal(body, &data); err != nil {
-			return Record{}, err
+			return []Record{}, err
 		}
 
 		for _, record := range data.Records {
 			if strings.Contains(record.Fields.MobileNumber, number) {
-				return record, nil
+				records = append(records, record)
 			}
 		}
 
@@ -64,5 +65,5 @@ func (c *Client) SearchChat(table, number string) (Record, error) {
 		offset = data.Offset
 	}
 
-	return Record{}, nil
+	return records, nil
 }
