@@ -5,6 +5,7 @@ import (
 	twilio "AISale/services/twillio"
 	"encoding/json"
 	"log"
+	"time"
 )
 
 func (c *Client) PollTwilio(chatID, accountSID, authToken string) {
@@ -14,6 +15,7 @@ func (c *Client) PollTwilio(chatID, accountSID, authToken string) {
 		messages, err := fetchMessagesFromTwilio(chatID, lastMessageSID, accountSID, authToken)
 		if err != nil {
 			log.Println("Twilio fetch error:", err)
+			time.Sleep(5 * time.Second)
 			continue
 		}
 
@@ -39,7 +41,7 @@ func (c *Client) PollTwilio(chatID, accountSID, authToken string) {
 
 			lastMessageSID = m.Sid
 		}
-		//time.Sleep(1 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
