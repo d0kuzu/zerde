@@ -1,6 +1,7 @@
 package chat_controllers
 
 import (
+	"AISale/api/infrastructure/response_models"
 	"AISale/config"
 	"AISale/services/airtable"
 	twilio "AISale/services/twillio"
@@ -61,14 +62,18 @@ func (h *ChatHandler) GetAllChats(c *gin.Context) {
 	wg.Wait()
 	close(errs)
 
-	// собираем ошибки (если есть)
 	var failed []string
 	for err := range errs {
 		log.Println(err)
 		failed = append(failed, err.Error())
 	}
 
-	response := gin.H{"answer": records}
+	var chats []response_models.ResponseRecord
+	for _, record := range records {
+		chats = append(chats, record.ToResponse())
+	}
+
+	response := gin.H{"answer": chats}
 	if len(failed) > 0 {
 		response["errors"] = failed
 	}
