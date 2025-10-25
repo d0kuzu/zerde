@@ -16,10 +16,7 @@ type Settings struct {
 }
 
 func LoadConfig() (*Settings, error) {
-	err := godotenv.Load(".env")
-	if err != nil {
-		return nil, err
-	}
+	godotenv.Load(".env")
 
 	return &Settings{
 		ApiKey:     os.Getenv("API_KEY"),
