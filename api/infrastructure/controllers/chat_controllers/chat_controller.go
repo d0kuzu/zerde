@@ -92,18 +92,18 @@ func (h *ChatHandler) GetPagination(c *gin.Context) {
 	c.JSON(200, gin.H{"answer": pages})
 }
 
-//func (h *ChatHandler) GetChat(c *gin.Context) {
-//	clientNumber := c.Query("chat")
-//
-//	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
-//
-//	messages, err := twilioClient.GetConversation(clientNumber, config.BotNumber, 1000)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	c.JSON(200, gin.H{"answer": messages})
-//}
+func (h *ChatHandler) GetChat(c *gin.Context) {
+	clientNumber := c.Query("chat")
+
+	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
+
+	messages, err := twilioClient.GetConversation(clientNumber, config.BotNumber, 1000)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.JSON(200, gin.H{"answer": messages})
+}
 
 func (h *ChatHandler) SearchChat(c *gin.Context) {
 	client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)
