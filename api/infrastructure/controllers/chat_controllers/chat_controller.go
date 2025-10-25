@@ -27,8 +27,19 @@ func (h *ChatHandler) GetAllChats(c *gin.Context) {
 
 	records, err := client.ListPageRecords(h.cfg.TableName, page, 10)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(500, gin.H{"list pages error": err.Error()})
 		return
+	}
+
+	for _, record := range records {
+		twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
+
+		messagesCounter, err := twilioClient.GetMessagesCounter(record.Fields.MobileNumber, config.BotNumber, 1000)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		record.Fields.MessagesCounter = messagesCounter
 	}
 
 	c.JSON(200, gin.H{"answer": records})
@@ -45,18 +56,18 @@ func (h *ChatHandler) GetPagination(c *gin.Context) {
 	c.JSON(200, gin.H{"answer": pages})
 }
 
-func (h *ChatHandler) GetChat(c *gin.Context) {
-	clientNumber := c.Query("chat")
-
-	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
-
-	messages, err := twilioClient.GetConversation(clientNumber, config.BotNumber, 1000)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c.JSON(200, gin.H{"answer": messages})
-}
+//func (h *ChatHandler) GetChat(c *gin.Context) {
+//	clientNumber := c.Query("chat")
+//
+//	twilioClient := twilio.NewClient(h.cfg.AccountSID, h.cfg.AuthToken)
+//
+//	messages, err := twilioClient.GetConversation(clientNumber, config.BotNumber, 1000)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	c.JSON(200, gin.H{"answer": messages})
+//}
 
 func (h *ChatHandler) SearchChat(c *gin.Context) {
 	client := airtable.NewClient(h.cfg.ApiKey, h.cfg.BaseID)

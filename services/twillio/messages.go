@@ -42,24 +42,33 @@ func (c *Client) fetchMessages(from, to string, limit int) ([]Message, error) {
 	return data.Messages, nil
 }
 
-func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]Message, error) {
-	clientNumber = strings.ReplaceAll(clientNumber, "-", "")
+func (c *Client) fetchChat(from, to string, limit int) ([]Message, error) {
+	from = strings.ReplaceAll(from, "-", "")
 
-	if len(clientNumber) > 12 {
-		clientNumber = "+" + "1" + clientNumber[3:]
+	if len(from) > 12 {
+		from = "+" + "1" + from[3:]
 	}
 
-	incoming, err := c.fetchMessages(clientNumber, botNumber, limit)
+	incoming, err := c.fetchMessages(from, to, limit)
 	if err != nil {
 		return nil, err
 	}
 
-	outgoing, err := c.fetchMessages(botNumber, clientNumber, limit)
+	outgoing, err := c.fetchMessages(to, from, limit)
 	if err != nil {
 		return nil, err
 	}
 
 	all := append(incoming, outgoing...)
+
+	return all, nil
+}
+
+func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]Message, error) {
+	all, err := c.fetchChat(clientNumber, botNumber, limit)
+	if err != nil {
+		return nil, err
+	}
 
 	sort.Slice(all, func(i, j int) bool {
 		layoutZ := time.RFC1123Z // с часовым смещением +0000
@@ -83,6 +92,19 @@ func (c *Client) GetConversation(clientNumber, botNumber string, limit int) ([]M
 	}
 
 	return all, nil
+}
+
+func (c *Client) GetMessagesCounter(clientNumber, botNumber string, limit int) (int, error) {
+	all, err := c.fetchChat(clientNumber, botNumber, limit)
+	if err != nil {
+		return 0, err
+	}
+
+	if len(all) > limit {
+		all = all[len(all)-limit:]
+	}
+
+	return len(all), nil
 }
 
 func (c *Client) SendMessage(from, to, body string) (*Message, error) {
