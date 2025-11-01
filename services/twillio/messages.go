@@ -1,6 +1,8 @@
 package twilio
 
 import (
+	"AISale/config"
+	"AISale/services/airtable"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +10,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -147,4 +150,31 @@ func (c *Client) SendMessage(from, to, body string) (*Message, error) {
 	}
 
 	return &msg, nil
+}
+
+func (c *Client) AddMessagesCounters(records []airtable.Record) {
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 5)
+	errs := make(chan error, len(records))
+
+	for i := range records {
+		wg.Add(1)
+		sem <- struct{}{}
+
+		go func(rec *airtable.Record) {
+			defer wg.Done()
+			defer func() { <-sem }()
+
+			messagesCounter, err := c.GetMessagesCounter(rec.Fields.MobileNumber, config.BotNumber, 1000)
+			if err != nil {
+				errs <- fmt.Errorf("twilio error for %s: %w", rec.Fields.MobileNumber, err)
+				return
+			}
+
+			rec.Fields.MessagesCounter = messagesCounter
+		}(&records[i])
+	}
+
+	wg.Wait()
+	close(errs)
 }
