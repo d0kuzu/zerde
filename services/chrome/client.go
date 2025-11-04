@@ -1,0 +1,39 @@
+package chrome
+
+import (
+	"context"
+	"github.com/chromedp/chromedp"
+	"log"
+	"time"
+)
+
+type Client struct {
+	AllocCancel context.CancelFunc
+	BrowserCtx  context.Context
+}
+
+func Init() *Client {
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", false),
+		// chrome.Flag("no-sandbox", true),
+		// chrome.Flag("disable-gpu", true),
+	)
+
+	allocCtx, allocCancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	browserCtx, _ := chromedp.NewContext(allocCtx)
+
+	if err := chromedp.Run(browserCtx); err != nil {
+		log.Fatalf("Chrome init error: %v", err)
+	}
+
+	log.Println("Chrome started (headless)")
+	return &Client{BrowserCtx: browserCtx, AllocCancel: allocCancel}
+}
+
+func (c *Client) Close() {
+	if c.AllocCancel != nil {
+		c.AllocCancel()
+		log.Println("Waiting Chrome to exit...")
+		time.Sleep(500 * time.Millisecond)
+	}
+}

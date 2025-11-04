@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ChatRoutes(router *gin.Engine, settings *config.Settings) {
-	h := chat_controllers.NewChatHandler(settings)
-	wsh := ws.NewWSHandler(settings)
+func ChatRoutes(router *gin.Engine, app *config.App) {
+	h := chat_controllers.NewChatHandler(app.Cfg)
+	wsh := ws.NewWSHandler(app.Cfg)
 
 	productGroup := router.Group("chats")
 	{

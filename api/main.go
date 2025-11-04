@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func RouterStart(settings *config.Settings) {
+func RouterStart(app *config.App) {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -18,7 +18,8 @@ func RouterStart(settings *config.Settings) {
 		MaxAge:       12 * 60 * 60,
 	}))
 
-	rest.ChatRoutes(r, settings)
+	rest.ChatRoutes(r, app)
+	rest.UserRoutes(r, app)
 
 	err := r.Run(":8080")
 	if err != nil {
