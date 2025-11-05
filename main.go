@@ -15,7 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	chromeClient := chrome.Init(settings.)
+	chromeClient := chrome.Init(settings.ChroniumPath)
 
 	cm := &cleanup.CleanupManager{}
 	cm.Add(chromeClient.Close)
