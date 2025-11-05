@@ -19,6 +19,8 @@ WORKDIR /root/
 
 COPY --from=builder /app/server .
 
+ENV CHROME_PATH=/usr/bin/chromium-browser
+
 EXPOSE 8080
 
 CMD ["./server"]
