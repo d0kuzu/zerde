@@ -3,19 +3,17 @@ FROM golang:1.23.3-alpine AS builder
 
 WORKDIR /app
 
-# Устанавливаем зависимости для сборки
-RUN apk add --no-cache git
-
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+
 RUN go build -o server .
 
 # Этап 2: запуск
 FROM alpine:latest
 
-# Устанавливаем сертификаты и Chromium
+# Устанавливаем сертификаты, Chromium и зависимости для headless-режима
 RUN apk --no-cache add \
     ca-certificates \
     chromium \
@@ -23,17 +21,14 @@ RUN apk --no-cache add \
     freetype \
     harfbuzz \
     ttf-freefont \
-    font-noto-emoji
+    dumb-init
 
 WORKDIR /root/
 
 COPY --from=builder /app/server .
 
-# Указываем путь до chromium (на Alpine он вот такой)
-ENV CHROME_PATH=/usr/bin/chromium-browser
-# Можно также явно отключить sandbox, чтобы chromedp не падал под root
-ENV CHROMEDP_NO_SANDBOX=true
-
 EXPOSE 8080
 
+# Используем dumb-init для корректного завершения процессов Chromium
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["./server"]
