@@ -1,4 +1,4 @@
-# Этап 1: сборка
+# Этап 1: сборка Go-приложения
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
@@ -10,16 +10,15 @@ COPY . .
 
 RUN go build -o server .
 
-# Этап 2: запуск
-FROM alpine:latest
+# Этап 2: запуск на headless Chromium
+FROM chromedp/headless-shell:latest
 
-RUN apk --no-cache add ca-certificates
+# Устанавливаем сертификаты (иногда нужны)
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root/
 
 COPY --from=builder /app/server .
-
-ENV CHROME_PATH=/usr/bin/chromium-browser
 
 EXPOSE 8080
 

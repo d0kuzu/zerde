@@ -14,7 +14,6 @@ type Client struct {
 
 func Init(path string) *Client {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.ExecPath(path),
 		chromedp.Flag("headless", true),
 		chromedp.Flag("no-sandbox", true),
 		chromedp.Flag("disable-gpu", true),
