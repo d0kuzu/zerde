@@ -14,9 +14,9 @@ type Client struct {
 
 func Init() *Client {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", false),
-		// chrome.Flag("no-sandbox", true),
-		// chrome.Flag("disable-gpu", true),
+		chromedp.Flag("headless", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.Flag("disable-gpu", true),
 	)
 
 	allocCtx, allocCancel := chromedp.NewExecAllocator(context.Background(), opts...)

@@ -18,11 +18,30 @@ func NewUserHandler(cfg *config.Settings, chrome *chrome.Client) *UserHandler {
 	}
 }
 
+type UploadTextRequest struct {
+	Content string `json:"content"`
+}
+
 func (h *UserHandler) ChangePrompt(c *gin.Context) {
-	err := h.chrome.ChangePrompt(h.cfg.DiaxelLogin, h.cfg.DiaxelPassword, "test")
+	var req UploadTextRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.chrome.ChangePrompt(req.Content)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(200, gin.H{})
+}
+
+func (h *UserHandler) GetPrompt(c *gin.Context) {
+	prompt, err := h.chrome.GetPrompt()
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"answer": prompt})
 }

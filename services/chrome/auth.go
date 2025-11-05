@@ -35,29 +35,19 @@ func (c *Client) UpdateAuth(login, password string) error {
 
 	tasks := chromedp.Tasks{}
 	tasks = append(tasks, chromedp.Navigate("https://diaxel.com/login"))
-	tasks = append(tasks, c.WaitSend(`email`, login, chromedp.ByID))
-	tasks = append(tasks, c.WaitSend("password", password, chromedp.ByID))
+	tasks = append(tasks, c.waitSend(`email`, login, chromedp.ByID))
+	tasks = append(tasks, c.waitSend("password", password, chromedp.ByID))
 	if err := chromedp.Run(ctx, tasks); err != nil {
 		return err
 	}
 	fmt.Println("Passed step 1")
 
 	tasks = chromedp.Tasks{}
-	tasks = append(tasks, c.WaitClickRedirect(`//*[@id="root"]/div/div/div/div[1]/div/form/div[4]/button`, chromedp.BySearch))
+	tasks = append(tasks, c.waitClickRedirect(`//*[@id="root"]/div/div/div/div[1]/div/form/div[4]/button`, chromedp.BySearch))
+	tasks = append(tasks, chromedp.Sleep(500*time.Millisecond))
 	if err := chromedp.Run(ctx, tasks); err != nil {
 		return err
 	}
 	fmt.Println("Passed step 2")
-
-	var value string
-	tasks = chromedp.Tasks{}
-	tasks = append(tasks, chromedp.Sleep(5*time.Second))
-	tasks = append(tasks, chromedp.Navigate("https://diaxel.com/agents/5d5b3880-db37-4b65-a103-db5290e5d5cd/edit"))
-	tasks = append(tasks, c.WaitGetText(`//*[@id="root"]/div/div/div[2]/main/div[2]/div/div[2]/div[1]/div/div[2]/div/div/div/div/div/div/p`, &value, chromedp.BySearch))
-	if err := chromedp.Run(ctx, tasks); err != nil {
-		return err
-	}
-	fmt.Println("Passed step 3")
-	fmt.Println(value)
 	return nil
 }
