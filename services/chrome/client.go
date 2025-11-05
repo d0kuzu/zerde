@@ -12,13 +12,11 @@ type Client struct {
 	BrowserCtx  context.Context
 }
 
-func Init(path string) *Client {
+func Init() *Client {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.ExecPath(path),
-		chromedp.Flag("headless", false),
+		chromedp.Flag("headless", true),
 		chromedp.Flag("no-sandbox", true),
 		chromedp.Flag("disable-gpu", true),
-		chromedp.Flag("window-size", "1280,800"),
 	)
 
 	allocCtx, allocCancel := chromedp.NewExecAllocator(context.Background(), opts...)
