@@ -30,7 +30,7 @@ func (c *Client) CheckAuth() (bool, error) {
 func (c *Client) UpdateAuth(login, password string) error {
 	ctx, cancel := chromedp.NewContext(c.BrowserCtx)
 	defer cancel()
-	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	tasks := chromedp.Tasks{}
