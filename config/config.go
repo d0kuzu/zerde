@@ -29,6 +29,8 @@ type Settings struct {
 
 	DiaxelLogin    string
 	DiaxelPassword string
+
+	ChroniumPath string
 }
 
 func LoadConfig() (*Settings, error) {
@@ -42,5 +44,6 @@ func LoadConfig() (*Settings, error) {
 		AuthToken:      os.Getenv("AUTH_TOKEN"),
 		DiaxelLogin:    os.Getenv("DIAXEL_LOGIN"),
 		DiaxelPassword: os.Getenv("DIAXEL_PASSWORD"),
+		ChroniumPath:   os.Getenv("CHROMIUM_PATH"),
 	}, nil
 }

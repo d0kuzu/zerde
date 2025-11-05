@@ -10,12 +10,12 @@ import (
 )
 
 func main() {
-	chromeClient := chrome.Init()
-
 	settings, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	chromeClient := chrome.Init(settings.)
 
 	cm := &cleanup.CleanupManager{}
 	cm.Add(chromeClient.Close)
